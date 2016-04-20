@@ -364,7 +364,7 @@ let(:campaign) { FactoryGirl.create(:campaign)}
 # def arg
 #   @arg ||= FactoryGirl.create(:arg)
 # end
-let(:user) { FactoryGirl.create(:campaign) }
+let(:user) { FactoryGirl.create(:user) }
 
 describe "#new" do
 
