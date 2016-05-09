@@ -145,27 +145,19 @@ RSpec.describe CampaignsController, type: :controller do
 
   describe "#update" do
     describe "with valid params" do
-
       let(:new_valid_body) {Faker::Hipster.paragraph}
-
       before do
         patch :update, id: campaign.id, campaign: {body: new_valid_body}
       end
-
       it "updates the record whose id is passed" do
-
         expect(campaign.reload.body).to eq(new_valid_body)
       end
-
       it "redirects to the show page" do
-
         expect(response).to redirect_to(campaign_path(campaign))
       end
-
       it "sets a flash notice message" do
         expect(flash[:notice]).to be
       end
-
     end
 
     describe "with invalid params" do

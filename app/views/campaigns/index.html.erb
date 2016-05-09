@@ -1,0 +1,10 @@
+<h1> All Campaigns </h1>
+
+<h2> Recent Campaigns </h2>
+
+<% @campaigns.each do |campaign| %>
+  <div class="well">
+    <h3><%= campaign.title.capitalize %></h3>
+    <hr>
+  </div>
+<% end %>
