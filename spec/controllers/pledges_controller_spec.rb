@@ -22,7 +22,7 @@ RSpec.describe PledgesController, type: :controller do
 
     context "with a signed in user" do
       # We set the session[:user_id] to a valid user id to emulate user being signed in
-      before { request.session[:user_id] = user.id }
+      before { login(user) }
       it "renders a new template" do
         get :new, campaign_id: campaign.id
         expect(response).to render_template(:new)

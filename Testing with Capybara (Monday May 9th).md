@@ -141,7 +141,7 @@ These were a few tests for the `index.html.erb` - we'll move to tests for `user_
 bin/rails g rspec:feature user_signup
 ```
 
-Since Capybara can be slow (due to emulation of browser requests etc.) - we can generate multiple tests at once
+Since Capybara can be slow (due to emulation of browser requests etc.) - we can generate multiple tests at once rather than running RSpec 3 times. This scenario is fine because we don't have that many tests for this page.
 
 ```ruby
 # user_signups_spec.rb
@@ -247,3 +247,101 @@ helper_method :current_user
 ```
 
 Then run the test and we should pass.
+
+Let's finish the two other tests in this describe
+
+```ruby
+# user_signups_spec.rb
+
+expect(current_path).to eq(root_path)
+expect(page).to have_text /account created!/i
+```
+
+Note that the latter of these tests fail.
+```erb
+<!-- application.html.erb -->
+
+<% if notice %>
+   <div class="alert alert-success"><%= notice %></div>
+ <% elsif alert %>
+   <div class="alert alert-danger"><%= alert %></div>
+ <% end %>
+ ```
+
+Now after success, let's move on to `invalid user data`
+```ruby
+# user_signups_spec.rb
+
+describe "with invalid user data" do
+ it "shows errors and stays on the form submissions page" do
+   visit new_user_path
+   click_button "Sign Up"
+   expect(page).to have_text /can't be blank/i
+ end
+end
+
+# Note this might pass because of our validations, comment out to fail once - may have to add `attr_accessor :password, :password_confirmation` to fail, commenting out has_secure_password will make the test fail for other reasons
+```
+
+
+```ruby
+# user_signups_spec.rb
+
+expect(current_path).to eq(new_user_path)
+```
+
+Look carefully at the error message in console:
+```bash
+expected: "/users/new"
+got: "/users"
+```
+Notice that the error given is a little strange. This is because when an invalid response is submitted, we <em> render </em> the `users_path`. So we make the change to `users_path`
+
+```ruby
+# user_signups_spec.rb
+
+expect(current_path).to eq(users_path)
+```
+
+Now the test should pass.
+
+Writing these tests might be inefficient since many actions are similar (log-in etc.). We can create "helper" methods to refactor.
+
+```ruby
+# rails_helper.rb
+
+# Uncomment the line below (line: 23)
+Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+# This line visits every file inside this support directory and requires each file one at a time. We can create a folder inside the spec called support to utilize this.
+```
+
+In the spec folder, create a folder called `support` with a file `login_helper.rb` inside.
+
+```ruby
+# login_helper.rb
+
+module LoginHelper
+
+  def login(user)
+    request.session[:user_id] = user.id
+  end
+
+end
+```
+
+Now we add a line in `rails_helper.rb`
+```ruby
+# rails_helper.rb
+
+config.include LoginHelper
+# this will include the LoginHelper module for every test that we run
+# in our suite. LoginHelper came from a file that is in the support directory.
+```
+
+```ruby
+# pledges_controller_spec.rb
+
+before { request.session[:user_id] = user.id }
+# Now becomes
+before { login(user) }
+```

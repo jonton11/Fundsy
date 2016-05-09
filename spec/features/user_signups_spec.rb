@@ -20,6 +20,16 @@ RSpec.feature "UserSignups", type: :feature do
 
       full_name = "#{valid_attributes[:first_name]} #{valid_attributes[:last_name]}"
       expect(page).to have_text /#{full_name}/i
+      expect(current_path).to eq(root_path)
+      expect(page).to have_text /account created!/i
+    end
+  end
+  describe "with invalid user data" do
+    it "shows errors and stays on the form submissions page" do
+      visit new_user_path
+      click_button "Sign Up"
+      expect(page).to have_text /can't be blank/i
+      expect(current_path).to eq(users_path)
     end
   end
 end
