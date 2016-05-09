@@ -283,6 +283,7 @@ end
 # Note this might pass because of our validations, comment out to fail once - may have to add `attr_accessor :password, :password_confirmation` to fail, commenting out has_secure_password will make the test fail for other reasons
 ```
 
+Now let's add the test for `stays on the form submission page`
 
 ```ruby
 # user_signups_spec.rb
