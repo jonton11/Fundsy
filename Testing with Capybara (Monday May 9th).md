@@ -64,7 +64,8 @@ end
 
 Now to test in the terminal:
 ```bash
-# Can also specify the line for the test we wish to run
+# In terminal; can also specify the line for the test we wish to run
+
 rspec ./spec/features/campaigns_spec.rb
 ```
 
@@ -166,6 +167,8 @@ end
 ```
 
 ```bash
+# In terminal
+
 rspec ./spec/features/user_signups_spec.rb
 ```
 
