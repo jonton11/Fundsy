@@ -8,7 +8,7 @@ RSpec.describe PledgesController, type: :controller do
   # def arg
   #   @arg ||= FactoryGirl.create(:arg)
   # end
-  let(:user) { FactoryGirl.create(:campaign) }
+  let(:user) { FactoryGirl.create(:user) }
 
   describe "#new" do
 

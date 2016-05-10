@@ -328,6 +328,7 @@ module LoginHelper
 
   def login(user)
     request.session[:user_id] = user.id
+    # Note that this request method is only accessible in user/session controller methods
   end
 
 end
