@@ -323,3 +323,140 @@ u.send(:first_name)
 u.send(:generate_api_key)
 u.save
 ```
+
+Now to create authentication, head back to the campaigns_controller.rb and create the method
+```ruby
+# campaigns_controller.rb - api/v1
+
+before_action :authenticate_user
+
+private
+
+def authenticate_user
+  def authenticate_user
+    @user = User.find_by_api_key params[:api_key]
+    # We can't redirect but we can send a different HTTP code
+    head :forbidden unless @user
+  end
+end
+```
+
+Now try to access the the campaigns for the User and we will be given a forbidden page.
+
+Head to rails console and grab the necessary api key for that user.
+
+```bash
+# rails console
+
+# For example we will use User with id = 2
+u = User.find 2
+u.api_key
+# copy the key
+```
+
+In the URL, append ?api_key=(api_key) with no brackets. Make sure it corresponds with the correct User ID.
+```
+http://localhost:3000/campaigns/1 --> http://localhost:3000/campaigns/1?api_key=(api_key)
+```
+
+Now let's refactor a bit. Let's begin by making a file in our `api` folder called `base_controller.rb`
+
+```ruby
+# base_controller.rb
+
+class Api::BaseController < ApplicationController
+  before_action :authenticate_user
+
+  private
+
+  def authenticate_user
+    @user = User.find_by_api_key params[:api_key]
+    head :forbidden unless @user
+  end
+end
+```
+
+Because of this, we can remove these methods in our `campaigns_controller.rb`. Notice that now we must change which file it inherits from to our `BaseController`. While we're in this file let's also add our `create` and `campaign_params` methods for the next part.
+```ruby
+# campaigns_controller - api/v1
+
+class Api::V1::CampaignsController < Api::BaseController
+  def create
+    campaign = Campaign.new(campaign_params)
+    if campaign.save
+      render json: campaign
+      # Don't need instance variable here
+    else
+      render json: { errors: campaign.errors.full_messages }
+    end
+  end
+
+  private
+
+  def campaign_params
+    params.require(:campaign).permit(:title, :body, :goal, :end_date)
+  end
+end
+```
+
+Note that we can also curl (link) in our console to view the output. We can also use the Postman app.
+
+```bash
+curl # link here
+```
+
+However, when using the Postman app we may get forbidden errors due to cross-site scripting. Rails actually does this for us with `protect_from_forgery`. Let's head to our BaseController to amend this.
+
+```ruby
+# base_controller.rb
+
+class Api::BaseController < ApplicationController
+  protect_from_forgery with: :null_session
+  # Null session takes all the session data and makes it null. This is fine in this scenario because we aren't depending on the session here, only the API key.
+  before_action :authenticate_user
+
+  private
+
+  def authenticate_user
+    @user = User.find_by_api_key params[:api_key]
+    head :forbidden unless @user
+  end
+end
+```
+
+Testing again and the Postman request should go through.
+
+ASIDE: Testing the `faraday` gem. Let's create a separate file for this. First, install the faraday gem
+
+```bash
+# terminal
+
+gem install faraday
+```
+
+Now make the file as follows:
+```ruby
+# fundsy_ruby_client.rb
+
+require "faraday"
+require "json"
+
+BASE_URL = "http://localhost:3000/"
+
+conn = Faraday.new(url: BASE_URL) do |faraday|
+  faraday.request  :url_encoded             # form-encode POST params
+  faraday.response :logger                  # log requests to STDOUT
+  faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+end
+
+response = conn.get (add the rest of the url here)
+# puts response.body
+# Notice that response.body returns an array of hashes
+
+campaigns = JSON.parse(response.body)
+
+# Print the titles
+campaigns.each do |campaign|
+  puts campaign["title"]
+end
+```
