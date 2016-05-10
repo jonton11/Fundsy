@@ -9,7 +9,20 @@ class User < ActiveRecord::Base
   validates_presence_of :first_name, :last_name, :email
   validates :email, uniqueness: true
 
+  before_create :generate_api_key
+
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  private
+
+  def generate_api_key
+    begin
+      self.api_key = SecureRandom.hex(32)
+      # Recall that we use self here to reference the object (instance variable)
+      # rather than the class. When we are setting a variable we use self. but
+      # reading a variable it becomes redundant.
+    end while User.exists?(api_key: api_key)
   end
 end
