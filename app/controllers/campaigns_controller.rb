@@ -1,4 +1,4 @@
-class CampaignsController < ApplicationController
+class CampaignsController < ApplicationController # :nodoc:
   before_action :find_campaign, only: [:show, :edit, :update, :destroy]
 
   def new
@@ -6,17 +6,16 @@ class CampaignsController < ApplicationController
   end
 
   def create
-
     campaign_params = params.require(:campaign).permit(:title, :body, :goal, :end_date)
     @campaign = Campaign.new(campaign_params)
     if @campaign.save
-      redirect_to campaign_path(@campaign), notice: "Campaing created!"
+      redirect_to campaign_path(@campaign), notice: 'Campaing created!'
     else
-      flash[:alert] = "Not saved!"
+      flash[:alert] = 'Not saved!'
       render :new
     end
     # render nothing: true # if we render, we cannot redirect - will pass error
-    # flash[:notice] = "Created!" -> we can also just add to line 10
+    # flash[:notice] = 'Created!' -> we can also just add to line 10
   end
 
   def show
@@ -27,6 +26,12 @@ class CampaignsController < ApplicationController
 
   def index
     @campaigns = Campaign.order(:created_at)
+    respond_to do |format|
+      format.json { render json: @campaigns }
+      # note that render json: will automatically call .to_json method to the
+      # argument passed
+      format.html { render }
+    end
   end
 
   def edit
@@ -37,7 +42,7 @@ class CampaignsController < ApplicationController
     @campaign = Campaign.find params[:id]
     campaign_params = params.require(:campaign).permit(:title, :body, :goal, :end_date)
     if @campaign.update campaign_params
-      redirect_to campaign_path(@campaign), notice: "Updated!"
+      redirect_to campaign_path(@campaign), notice: 'Updated!'
     else
       render :edit
     end
@@ -46,7 +51,7 @@ class CampaignsController < ApplicationController
   def destroy
     @campaign = Campaign.find params[:id]
     if @campaign.destroy
-      redirect_to campaigns_path, notice: "Destroyed!"
+      redirect_to campaigns_path, notice: 'Destroyed!'
     else
       render :index
     end
@@ -61,5 +66,4 @@ class CampaignsController < ApplicationController
   def campaign_params
     params.require(:campaign).permit(:title, :body, :goal, :end_date)
   end
-
 end

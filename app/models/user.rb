@@ -4,6 +4,7 @@ class User < ActiveRecord::Base
   has_secure_password
 
   has_many :pledges, dependent: :nullify
+  has_many :campaigns, dependent: :nullify
 
   validates_presence_of :first_name, :last_name, :email
   validates :email, uniqueness: true
