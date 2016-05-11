@@ -394,3 +394,12 @@ And finally in the terminal
 
 rake db:mongoid:create_indexes
 ```
+
+When do we choose to use NoSQL over PostgreSQL?
+
+Unfortunately, it depends.
+- If relationships between data types are important => development will be easier with PostgreSQL.
+- Example: A store => {product, line_items, order} => PostgreSQL (but may have to change to scale when your app grows)
+- Note that key-value storage will have much better performance.
+- Fan-out => when data needs to go to a lot of areas (e.g. Justin Bieber tweeting to 25m people) - RMDBS will not accomplish this so a combination may be needed
+- NoSQL tends to have more development overhead (no need for schema...but this may be counterintuitive)
