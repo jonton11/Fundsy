@@ -76,7 +76,8 @@ Now we need to set up the routes necessary for redirecting to Twitter.
 ```ruby
 # routes.rb
 
-get "/auth/twitter", as: :sign_in_with_twitter
+get '/auth/twitter', as: :sign_in_with_twitter
+get '/auth/twitter/callback' => 'callbacks#twitter'
 ```
 
 Then we need to implement a Sign In feature.
@@ -88,6 +89,26 @@ Then we need to implement a Sign In feature.
 ```
 
 Now start the rails server `bin/rails s` and click the new link to be redirected to Twitter.
+
+Let's generate a controller to handle the callback feature.
+
+```bash
+# terminal
+
+bin/rails g controller callbacks
+```
+
+Now head to the controller and add the `twitter` method
+```ruby
+# callbacks_controller.rb
+
+class CallbacksController < ApplicationController # :nodoc:
+  def twitter
+    render json: request.env['omniauth.auth']
+    # Let's inspect what information is returned - this will be a hash
+  end
+end
+```
 
 ## Debugging Tips
 
