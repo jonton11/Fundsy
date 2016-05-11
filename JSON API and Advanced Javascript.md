@@ -514,7 +514,7 @@ end
 ```
 
 ## Advanced Javascript
-
+<hr>
 <em> this </em> references an object depending on the context.
 
 This refers to the global context. In the console, calling `this` will simply return the window. Think of `this` as referencing "one step above".
