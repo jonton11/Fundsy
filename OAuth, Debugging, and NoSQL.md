@@ -58,6 +58,7 @@ Now create a file in `initializers` called `omniauth_setup.rb`. From the Omniaut
 
 ```bash
 # bin/rails c
+
 Rails.application.secrets.twitter_consumer_key
 Rails.application.secrets.twitter_consumer_secret
 ```
@@ -83,7 +84,7 @@ get '/auth/twitter/callback' => 'callbacks#twitter'
 Then we need to implement a Sign In feature.
 
 ```erb
-# application.html.erb
+<!-- application.html.erb -->
 
 <%= link_to 'Sign In With Twitter', sign_in_with_twitter_path %>
 ```
@@ -110,7 +111,170 @@ class CallbacksController < ApplicationController # :nodoc:
 end
 ```
 
+Let's add the OAuth fields to our user model now.
+
+```bash
+# terminal
+
+bin/rails g migration add_oauth_fields_to_users uid provider twitter_token twitter_secret twitter_raw_data:text
+```
+
+Let's head to the migration file and decide what we need to index
+
+```ruby
+# migration file
+
+class AddOauthFieldsToUsers < ActiveRecord::Migration
+  def change
+    add_column :users, :uid, :string
+    add_column :users, :provider, :string
+    add_column :users, :twitter_token, :string
+    add_column :users, :twitter_secret, :string
+    add_column :users, :twitter_raw_data, :text
+
+    add_index :users, [:uid, :provider]
+    # Composite index
+  end
+end
+
+# bin/rake db:migrate in terminal after
+```
+
+Now let's add to our callback controller
+```ruby
+# callbacks_controller.rb
+
+def twitter
+  user = User.find_or_create_with_twitter request.env['omniauth.auth']
+  session[:user_id] = user.id
+  redirect_to root_path, notice: 'Thank you for signing in with Twitter'
+  # render json: request.env['omniauth.auth']
+end
+```
+
+And now we have to define the `find_or_create_with_twitter` method.
+```ruby
+# user.rb - public method
+
+def self.find_or_create_with_twitter(omniauth_data)
+  user = User.where(provider: 'twitter', uid: omniauth_data['uid']).first
+  # We need .first here because it is an array - we simply want the first one
+  unless user
+    full_name = omniauth_data['info']['name']
+    user = User.create(first_name: full_name[0..full_name.rindex(' ')-1],
+                       last_name: full_name.split.last,
+                       provider: 'twitter',
+                       uid: omniauth_data['uid'],
+                       password: SecureRandom.hex(16),
+                       twitter_token: omniauth_data['credentials']['token'],
+                       twitter_secret: omniauth_data['credentials']['secret'],
+                       twitter_raw_data: omniauth_data)
+    # first_name: is parsed by using .rindex - play with this in console to see
+    # password is unnecessary for now - you can change this later. For now we'll use SecureRandom.hex(16)
+    # Grab the twitter data from schema.rb
+  end
+  user
+end
+```
+
+Notice that our email validation now may pose issues. Two blank emails also fails the uniqueness validation. We will need <em> conditional validations </em>
+
+```ruby
+# user.rb
+
+validates :email, presence: true, uniqueness: true, unless: :with_oauth?
+
+def with_oauth?
+  provider.present? && uid.present?
+end
+# Will only kick the uniqueness and presence validation if this method returns true
+```
+
+We also want to store the Twitter raw data for our User model
+
+```ruby
+# user.rb
+
+serialize :twitter_raw_data, Hash
+# serialize the Twitter as a Hash - in the database there is no way to store
+# Hashes (they are text or blobs) so we'll use a method from serialize
+```
+
+ASIDE: Now the * won't appear on our Sign Up page as the validation has been removed, simply add `require: true` in the input line for the `new.html.erb` page
+```erb
+<!-- users/new.html.erb -->
+
+<%= f.input :email, require: true %>
+```
+
+Notice our code is awfully long, let's refactor.
+
+```ruby
+# user.rb - private method
+
+# Change name extraction into if/else in the case that the user signs up on Twitter with only one name
+
+def self.extract_first_name(full_name)
+  if full_name.rindex(" ")
+    full_name[0..full_name.rindex(" ") - 1]
+  else
+    full_name.split.first
+  end
+end
+
+def self.extract_last_name(full_name)
+  if full_name.rindex(' ')
+    full_name.split.last
+  else
+    ''
+  end
+end
+
+# Don't forget to change validations
+
+validates :first_name, presence: true
+validates :last_name, presence: true, unless :with_oauth?
+
+# And finally replace in the code.
+first_name: extract_first_name(full_name)
+last_name: extract_last_name(full_name)
+```
+
+Let's integrate the feature to tweet on behalf of the user. Begin by installing the `twitter` gem
+
+```ruby
+# Gemfile
+
+require 'twitter'
+
+# bundle in terminal
+```
+
+We need to create a client object for the Twitter gem that takes in consumer key and consumer secret. Refer to the Twitter gem on Github for more information. For now we'll simply insert the code in `User.rb` to test it out.
+
+```ruby
+# user.rb - private method
+
+user = User.last
+client = Twitter::REST::Client.new do |config|
+  config.consumer_key        = Rails.application.secrets.twitter_consumer_key
+  config.consumer_secret     = Rails.application.secrets.twitter_consumer_key
+  config.access_token        = user.twitter_token # from user
+  config.access_token_secret = user.twitter_secret # from user
+end
+```
+
+```bash
+# bin/rails c - test to see the methods working
+
+client.follow("internethostage")
+client.update("@internethostage Hello Cristian")
+# Head back to your Twitter and you will see that you followed and tweeted
+```
+
 ## Debugging Tips
+<hr>
 
 
 ## NoSQL
+<hr>
