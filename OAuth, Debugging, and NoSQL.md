@@ -13,14 +13,14 @@ Before integrating this feature, a developer must decide if they want the User t
 
 Assumptions: Our Application has the `has_secure_password` feature and you have Twitter credentials (if not you must sign up for a Twitter account).
 <hr>
-ASIDE: Twitter Credentials
+### Twitter Credentials
 
 - Visit https://apps.twitter.com
 - Click `Create New App`
 - Give your app a name and description
 - Website will be `http://127.0.0.1:3000/` and the callback URL will be `http://127.0.0.1:3000/callbacks/twitter`
   - Note that the domain we use our IP address as a workaround as Twitter does not allow `localhost`
-- Head to permissions and take a note of what permissions are allowed by Twitter
+- Head to permissions and take a note of what permissions are allowed by Twitter. Check the second radio button (Read and Write)
 
 We'll rename our `secrets.yml` to `secrets.yml.example` and add `/config/secrets.yml` to our `.gitignore` file
 ```ruby
@@ -31,16 +31,19 @@ We'll rename our `secrets.yml` to `secrets.yml.example` and add `/config/secrets
 /config/secrets.yml
 ```
 
-- Create a file in your config folder called `secrets.yml` and store your `Consumer Key (API Key)` as well as the `Consumer Secret (API Secret)`
+Now duplicate `secrets.yml.example` and name it `secrets.yml`. This is for backup as well as if anyone wants to look at how we implemented something there is a reference.
+
+- Store your `Consumer Key (API Key)` as well as the `Consumer Secret (API Secret)` in `secrets.yml`
 
 ```ruby
 # config/secrets.yml
 
 development:
   secret_key_base: 3cf0654de8e0d10a482a9981216812ed12a3be2e14058664b987ed84c870f3a...
-  twitter_api_key: XXXXX
-  twitter_api_secret: YYYYY
+  twitter_consumer_key: XXXXX
+  twitter_consumer_secret: YYYYY
 ```
+
 <hr>
 Begin by adding the gem `omniauth-twitter` to `Gemfile`
 ```ruby
@@ -51,7 +54,40 @@ gem 'omniauth-twitter'
 # Don't forget to bundle after
 ```
 
+Now create a file in `initializers` called `omniauth_setup.rb`. From the Omniauth Github, we'll copy the setup code to include our secrets. You can check if your keys are defined in the rails console.
 
+```bash
+# bin/rails c
+Rails.application.secrets.twitter_consumer_key
+Rails.application.secrets.twitter_consumer_secret
+```
+
+```ruby
+# omniauth_setup.rb
+
+Rails.application.config.middleware.use OmniAuth::Builder do
+  provider :twitter, Rails.application.secrets.twitter_consumer_key,
+                     Rails.application.secrets.twitter_consumer_secret
+end
+```
+
+Now we need to set up the routes necessary for redirecting to Twitter.
+
+```ruby
+# routes.rb
+
+get "/auth/twitter", as: :sign_in_with_twitter
+```
+
+Then we need to implement a Sign In feature.
+
+```erb
+# application.html.erb
+
+<%= link_to 'Sign In With Twitter', sign_in_with_twitter_path %>
+```
+
+Now start the rails server `bin/rails s` and click the new link to be redirected to Twitter.
 
 ## Debugging Tips
 
