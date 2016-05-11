@@ -403,3 +403,5 @@ Unfortunately, it depends.
 - Note that key-value storage will have much better performance.
 - Fan-out => when data needs to go to a lot of areas (e.g. Justin Bieber tweeting to 25m people) - RMDBS will not accomplish this so a combination may be needed
 - NoSQL tends to have more development overhead (no need for schema...but this may be counterintuitive)
+
+If you're unsure of what your schema would be => store data as JSON in Postgres until you need more structure
