@@ -274,6 +274,8 @@ client.update("@internethostage Hello Cristian")
 
 ## Debugging Tips
 <hr>
+Skipped for the interest of time => Check out the presentation for notes.
+
 Push the Blog application for Peer Review
 ```bash
 # Comments for peer review of Blog
@@ -299,3 +301,96 @@ git reset origin/master --hard
 
 ## NoSQL
 <hr>
+
+NoSQL (or "Not Only" SQL) is an umbrella term systems that use storage and retrieval of data that doesn't use relational tables.
+
+Refer to slides (a lot of history etc.) => NoSQL is also very useful for Big Data applications, realtime applications (Twitter etc.)
+
+Refer to https://github.com/lastobelus/mongodb-crud/wiki for the walkthrough.
+```bash
+# terminal
+
+# Install MongoDB
+brew install mongodb
+
+# Run MongoDB in the background
+# & at the end will simply run the program in the background without the need to open a new tab
+mongod --config /usr/local/etc/mongod.conf &
+
+# Generate a new Rails app without ActiveRecord
+# ActiveRecord is SQL oriented so we want to skip this
+rails new mongodb-crud --skip-active-record
+```
+
+Now in our `Gemfile` let's add the necessary gems as well as Bootstrap
+```ruby
+# Gemfile
+
+# Gem to help connect to MongoDB
+gem 'mongoid', '~> 5.1.0'
+gem 'bootstrap-sass', '~> 3.3.6'
+gem 'bootstrap-generators', '~> 3.3.4'
+#
+```
+
+Now configure the files for Bootstrap:
+
+```js
+// application.js
+
+//= require bootstrap-sprockets
+```
+
+```ruby
+# rename application.css to application.scss
+
+@import "bootstrap-variables";
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "bootstrap-generators";
+```
+
+Back to our setup:
+
+```bash
+# terminal
+
+bundle install
+rails g mongoid:config
+
+bundle
+# Generator creates templates for when we use the scaffolder
+rails generate bootstrap:install --stylesheet-engine=scss
+
+# create the CRUD --> R U SRS RN
+rails g scaffold student first_name last_name email
+```
+
+Now a few changes in our `Ruby` files - we'll make validations here to prevent 3rd party ActiveRecord validations
+```ruby
+# routes.rb
+
+root 'students#index'
+
+# student.rb
+
+include Mongoid::Document
+field :first_name, type: String
+field :last_name, type: String
+field :email, type: String
+
+validates :first_name, :last_name, presence: true
+validates :email, presence: true, uniqueness: true
+
+# In Mongo, we define indexes in the model
+# However, simply defining it doesn't mean it's there. We need to run a rake job
+# to implement it fully. Unlike Rails, it has better integration for uniqueness
+index({ email: 1 }, { unique: true })
+```
+
+And finally in the terminal
+```bash
+# terminal
+
+rake db:mongoid:create_indexes
+```
