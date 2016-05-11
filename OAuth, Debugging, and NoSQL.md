@@ -274,7 +274,28 @@ client.update("@internethostage Hello Cristian")
 
 ## Debugging Tips
 <hr>
+Push the Blog application for Peer Review
+```bash
+# Comments for peer review of Blog
 
+git clone [git_project]
+git checkout -b code_review
+git checkout master
+git log
+# Grab the shaw of the very first commit (key)
+# Make a copy of your code now --> Damages might appear
+git reset (key)
+git checkout code_review
+git push -u origin code_review
+git checkout master
+git push -f origin master
+# After merging the branch on Github
+# Review the single commit via Github
+git fetch
+# Get the latest from Github
+git reset origin/master --hard
+# Reset your master to the master that was fetched from Github
+```
 
 ## NoSQL
 <hr>
