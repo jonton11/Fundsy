@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160511172351) do
+ActiveRecord::Schema.define(version: 20160513213605) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,6 +24,9 @@ ActiveRecord::Schema.define(version: 20160511172351) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "user_id"
+    t.string   "address"
+    t.float    "longitude"
+    t.float    "latitude"
   end
 
   add_index "campaigns", ["user_id"], name: "index_campaigns_on_user_id", using: :btree
@@ -52,6 +55,9 @@ ActiveRecord::Schema.define(version: 20160511172351) do
     t.string   "twitter_token"
     t.string   "twitter_secret"
     t.text     "twitter_raw_data"
+    t.string   "address"
+    t.float    "longitude"
+    t.float    "latitude"
   end
 
   add_index "users", ["api_key"], name: "index_users_on_api_key", unique: true, using: :btree

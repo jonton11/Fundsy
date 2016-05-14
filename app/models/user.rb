@@ -16,6 +16,9 @@ class User < ActiveRecord::Base
   # serialize the Twitter as a Hash - in the database there is no way to store
   # Hashes (they are text or blobs) so we'll use a method from serialize
 
+  geocoded_by :address
+  after_validation :geocode
+
   def with_oauth?
     provider.present? && uid.present?
   end

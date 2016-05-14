@@ -1,0 +1,24 @@
+<h1>  <%= @campaign.title %>                              </h1>
+<p>   <%= @campaign.body %>                                </p>
+<p>   <%= number_to_currency(@campaign.goal) %>            </p>
+<p>   End Date: <%= formatted_date(@campaign.end_date) %>  </p>
+
+<div style='width: 800px;'>
+  <div id="map" style='width: 800px; height: 400px;'></div>
+</div>
+
+<script>
+  handler = Gmaps.build('Google');
+  handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
+  markers = handler.addMarkers([
+    {
+      "lat": <%= @campaign.latitude %>,
+      "lng": <%= @campaign.longitude %>,
+      "infowindow": "<%= @campaign.title %>"
+    }
+  ]);
+  handler.bounds.extendWith(markers);
+  handler.fitMapToBounds();
+  handler.getMap().setZoom(17);
+  });
+</script>

@@ -35,6 +35,10 @@ gem 'twitter'
 # Use Unicorn as the app server
 # gem 'unicorn'
 
+gem 'geocoder'
+gem 'gmaps4rails'
+gem 'underscore-rails'
+
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 

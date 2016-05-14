@@ -1,0 +1,10 @@
+<h1> New Campaign </h1>
+
+<%= simple_form_for @campaign do |camp| %>
+  <%= camp.input :title %>
+  <%= camp.input :body %>
+  <%= camp.input :goal, as: :string%>
+  <%= camp.input :end_date %>
+  <%= camp.input :address %>
+  <%= camp.submit class: "btn btn-primary"%>
+<% end %>

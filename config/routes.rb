@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   end
 
   resources :users, only: [:new, :create]
-
+  resources :nearby_campaigns, only: [:index]
   resources :campaigns do
     resources :pledges, only: [:new, :create]
   end

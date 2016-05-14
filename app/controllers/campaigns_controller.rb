@@ -6,7 +6,6 @@ class CampaignsController < ApplicationController # :nodoc:
   end
 
   def create
-    campaign_params = params.require(:campaign).permit(:title, :body, :goal, :end_date)
     @campaign = Campaign.new(campaign_params)
     if @campaign.save
       redirect_to campaign_path(@campaign), notice: 'Campaing created!'
@@ -64,6 +63,6 @@ class CampaignsController < ApplicationController # :nodoc:
   end
 
   def campaign_params
-    params.require(:campaign).permit(:title, :body, :goal, :end_date)
+    params.require(:campaign).permit(:title, :body, :goal, :end_date, :address)
   end
 end

@@ -6,6 +6,8 @@ class Campaign < ActiveRecord::Base
   has_many :pledges, dependent: :destroy
   belongs_to :user
 
+  geocoded_by :address
+  after_validation :geocode
   def upcased_title
     title.upcase
   end
