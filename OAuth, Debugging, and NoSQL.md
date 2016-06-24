@@ -116,7 +116,7 @@ Let's add the OAuth fields to our user model now.
 ```bash
 # terminal
 
-bin/rails g migration add_oauth_fields_to_users uid provider twitter_token twitter_secret twitter_raw_data:text
+  bin/rails g migration add_oauth_fields_to_users uid provider twitter_token twitter_secret twitter_raw_data:text
 ```
 
 Let's head to the migration file and decide what we need to index

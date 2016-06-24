@@ -1,11 +1,27 @@
-<h1>  <%= @campaign.title %>                              </h1>
-<p>   <%= @campaign.body %>                                </p>
-<p>   <%= number_to_currency(@campaign.goal) %>            </p>
-<p>   End Date: <%= formatted_date(@campaign.end_date) %>  </p>
+<div class="col-md-8">
+  <h1>  <%= @campaign.title %> </h1>
+  <p>   <%= @campaign.body %>  </p>
+  <p>   <%= @campaign.goal %>  </p>
+  <p>   <%= @campaign.end_date %> </p>
 
-<div style='width: 800px;'>
-  <div id="map" style='width: 800px; height: 400px;'></div>
+  <div style='width: 800px;'>
+    <div id="map" style='width: 800px; height: 400px;'></div>
+  </div>
+
+  <%= @campaign.publish_button %>
+  <%= link_to "Pledge", new_campaign_pledge_path(@campaign), class: "btn btn-primary" %>
 </div>
+<div class="col-md-4">
+  <% @campaign.rewards.each do |rew| %>
+    <div class="panel panel-default">
+      <div class="panel-heading"><%= number_to_currency(rew.amount) %></div>
+      <div class="panel-body">
+        <%= rew.description %>
+      </div>
+    </div>
+  <% end  %>
+</div>
+
 
 <script>
   handler = Gmaps.build('Google');
